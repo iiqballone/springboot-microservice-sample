@@ -1,0 +1,38 @@
+version: "3.7"
+services:
+  eureka-server:
+    image:  eureka-server
+    hostname: eureka-server
+    ports:
+      - "8761:8761"
+      
+  review-service:
+    image:  review-service
+    ports:
+      - 8081:8081
+    depends_on:
+      - mysql_db
+      - eureka-server
+    links:
+      - mysql_db:app_db
+      - eureka-server:eureka
+  
+  mysql_db:
+    image: mysql:latest
+    restart: always
+    ports:
+      - 3307:3306
+    environment:
+      MYSQL_DATABASE: demodb
+      MYSQL_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root
+    
+  product-service:
+    image:  product-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - eureka-server
+      - review-service
+    links:
+      - eureka-server:eureka
